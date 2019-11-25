@@ -1,5 +1,7 @@
 # Requirements
 
+Create a web application with the following features:
+
 * An home page to present the system and hide informations from users that is not logged.
 * A login page
 * Logout
