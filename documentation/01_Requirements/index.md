@@ -5,7 +5,6 @@ Create a web application with the following features:
 ## General features
 
 * An home page to present the system and hide informations from users that is not logged.
-
 ## User workflow
 
 * A login page
@@ -26,3 +25,7 @@ Create a web application with the following features:
 ## API
 
 * CRUD api for housings and peoples
+
+## Relationships between models
+
+* The must store *housings* and *person*. A person or some peoples can live in a same *housing*. The sistem must shows housings, peoples and points who lives in what housing.
