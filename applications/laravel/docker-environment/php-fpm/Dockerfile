@@ -13,8 +13,7 @@
 #
 
 ARG LARADOCK_PHP_VERSION
-ARG BASE_IMAGE_TAG_PREFIX=latest
-FROM laradock/php-fpm:${BASE_IMAGE_TAG_PREFIX}-${LARADOCK_PHP_VERSION}
+FROM laradock/php-fpm:latest-${LARADOCK_PHP_VERSION}
 
 LABEL maintainer="Mahmoud Zalt <mahmoud@zalt.me>"
 
@@ -52,68 +51,15 @@ RUN set -xe; \
       docker-php-ext-install zip && \
       php -m | grep -q 'zip'
 
-#
-#--------------------------------------------------------------------------
-# Optional Software's Installation
-#--------------------------------------------------------------------------
-#
-# Optional Software's will only be installed if you set them to `true`
-# in the `docker-compose.yml` before the build.
-# Example:
-#   - INSTALL_SOAP=true
-#
-
-
-
-###########################################################################
-# libfaketime:
-###########################################################################
 
 USER root
-
-
-
-###########################################################################
-# pcntl
-###########################################################################
-
-ARG INSTALL_PCNTL=false
-RUN if [ ${INSTALL_PCNTL} = true ]; then \
-    # Installs pcntl, helpful for running Horizon
-    docker-php-ext-install pcntl \
-;fi
-
-###########################################################################
-# bcmath:
-###########################################################################
-
-
-###########################################################################
-# Exif:
-###########################################################################
-
-ARG INSTALL_EXIF=false
-
-RUN if [ ${INSTALL_EXIF} = true ]; then \
-    # Enable Exif PHP extentions requirements
-    docker-php-ext-install exif \
-;fi
 
 RUN docker-php-ext-install opcache 
 
 # Copy opcache configration
 COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
-###########################################################################
-# Mysqli Modifications:
-###########################################################################
-
-ARG INSTALL_MYSQLI=false
-
-RUN if [ ${INSTALL_MYSQLI} = true ]; then \
-    docker-php-ext-install mysqli \
-;fi
-
+RUN docker-php-ext-install mysqli 
 
 ###########################################################################
 # ImageMagick:
@@ -180,49 +126,6 @@ ARG INSTALL_CALENDAR=false
 RUN if [ ${INSTALL_CALENDAR} = true ]; then \
     docker-php-ext-configure calendar && \
     docker-php-ext-install calendar \
-;fi
-
-###########################################################################
-# Phalcon:
-###########################################################################
-
-ARG INSTALL_PHALCON=false
-ARG LARADOCK_PHALCON_VERSION
-ENV LARADOCK_PHALCON_VERSION ${LARADOCK_PHALCON_VERSION}
-
-# Copy phalcon configration
-COPY ./phalcon.ini /usr/local/etc/php/conf.d/phalcon.ini.disable
-
-RUN if [ $INSTALL_PHALCON = true ]; then \
-    apt-get install -yqq unzip libpcre3-dev gcc make re2c git automake autoconf\
-    && git clone https://github.com/jbboehr/php-psr.git \
-    && cd php-psr \
-    && phpize \
-    && ./configure \
-    && make \
-    && make test \
-    && make install \
-    && curl -L -o /tmp/cphalcon.zip https://github.com/phalcon/cphalcon/archive/v${LARADOCK_PHALCON_VERSION}.zip \
-    && unzip -d /tmp/ /tmp/cphalcon.zip \
-    && cd /tmp/cphalcon-${LARADOCK_PHALCON_VERSION}/build \
-    && ./install \
-    && mv /usr/local/etc/php/conf.d/phalcon.ini.disable /usr/local/etc/php/conf.d/phalcon.ini \
-    && rm -rf /tmp/cphalcon* \
-;fi
-
-###########################################################################
-# APCU:
-###########################################################################
-
-ARG INSTALL_APCU=false
-
-RUN if [ ${INSTALL_APCU} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-        pecl install -a apcu-4.0.11; \
-    else \
-        pecl install apcu; \
-    fi && \
-    docker-php-ext-enable apcu \
 ;fi
 
 ###########################################################################
@@ -371,22 +274,6 @@ RUN if [ ${INSTALL_MAILPARSE} = true ]; then \
 ;fi
 
 ###########################################################################
-# CacheTool:
-###########################################################################
-
-ARG INSTALL_CACHETOOL=false
-
-RUN if [ ${INSTALL_CACHETOOL} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && [ $(php -r "echo PHP_MINOR_VERSION;") -ge 1 ]; then \
-            curl -sO http://gordalina.github.io/cachetool/downloads/cachetool.phar; \
-    else \
-        curl http://gordalina.github.io/cachetool/downloads/cachetool-3.2.1.phar -o cachetool.phar; \
-    fi && \
-    chmod +x cachetool.phar && \
-    mv cachetool.phar /usr/local/bin/cachetool \
-;fi
-
-###########################################################################
 # XMLRPC:
 ###########################################################################
 
@@ -421,26 +308,9 @@ RUN if [ ${INSTALL_PHPDECIMAL} = true ]; then \
     ;fi \
 ;fi
 
-###########################################################################
-# New Relic for PHP:
-###########################################################################
-ARG NEW_RELIC=${NEW_RELIC}
-ARG NEW_RELIC_KEY=${NEW_RELIC_KEY}
-ARG NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME}
+RUN apt-get -y install curl libcurl4 && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN if [ ${NEW_RELIC} = true ]; then \
-  curl -L http://download.newrelic.com/php_agent/archive/9.9.0.260/newrelic-php5-9.9.0.260-linux.tar.gz | tar -C /tmp -zx && \
-  export NR_INSTALL_USE_CP_NOT_LN=1 && \
-  export NR_INSTALL_SILENT=1 && \
-  /tmp/newrelic-php5-*/newrelic-install install && \
-  rm -rf /tmp/newrelic-php5-* /tmp/nrinstall* && \
-  sed -i \
-  -e 's/"REPLACE_WITH_REAL_KEY"/"${NEW_RELIC_KEY}"/' \
-  -e 's/newrelic.appname = "PHP Application"/newrelic.appname = "${NEW_RELIC_APP_NAME}"/' \
-  -e 's/;newrelic.daemon.app_connect_timeout =.*/newrelic.daemon.app_connect_timeout=15s/' \
-  -e 's/;newrelic.daemon.start_timeout =.*/newrelic.daemon.start_timeout=5s/' \
-  /usr/local/etc/php/conf.d/newrelic.ini \
-;fi
 ###########################################################################
 # Downgrade Openssl:
 ###########################################################################

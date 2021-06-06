@@ -15,7 +15,6 @@ services:
       build:
         context: ./php-fpm
         args:
-          - BASE_IMAGE_TAG_PREFIX=${PHP_FPM_BASE_IMAGE_TAG_PREFIX}
           - LARADOCK_PHP_VERSION=${PHP_VERSION}
           - INSTALL_FFMPEG=${PHP_FPM_FFMPEG}
           - INSTALL_AUDIOWAVEFORM=${PHP_FPM_AUDIOWAVEFORM}
