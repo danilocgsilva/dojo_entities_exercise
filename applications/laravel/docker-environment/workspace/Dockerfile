@@ -297,7 +297,6 @@ USER root
 
 ARG INSTALL_MYSQL_CLIENT=false
 ARG INSTALL_PING=false
-ARG INSTALL_SSHPASS=false
 ARG INSTALL_DOCKER_CLIENT=false
 
 RUN set -eux; \
@@ -314,11 +313,6 @@ RUN set -eux; \
     apt-get -yqq install inetutils-ping; \
   fi; \
   ###########################################################################
-  # sshpass:
-  ###########################################################################
-  if [ ${INSTALL_SSHPASS} = true ]; then \
-    apt-get -yqq install sshpass; \
-  fi; \
   ###########################################################################
   # Docker Client:
   ###########################################################################

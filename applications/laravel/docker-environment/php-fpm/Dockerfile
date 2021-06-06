@@ -99,16 +99,7 @@ RUN if [ ${INSTALL_EXIF} = true ]; then \
     docker-php-ext-install exif \
 ;fi
 
-
-###########################################################################
-# Opcache:
-###########################################################################
-
-ARG INSTALL_OPCACHE=false
-
-RUN if [ ${INSTALL_OPCACHE} = true ]; then \
-    docker-php-ext-install opcache \
-;fi
+RUN docker-php-ext-install opcache 
 
 # Copy opcache configration
 COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
@@ -265,21 +256,6 @@ RUN if [ ${INSTALL_GETTEXT} = true ]; then \
     docker-php-ext-install gettext \
 ;fi
 
-###########################################################################
-# Install additional locales:
-###########################################################################
-
-ARG INSTALL_ADDITIONAL_LOCALES=false
-ARG ADDITIONAL_LOCALES
-
-RUN if [ ${INSTALL_ADDITIONAL_LOCALES} = true ]; then \
-    apt-get install -yqq locales \
-    && echo '' >> /usr/share/locale/locale.alias \
-    && temp="${ADDITIONAL_LOCALES%\"}" \
-    && temp="${temp#\"}" \
-    && for i in ${temp}; do sed -i "/$i/s/^#//g" /etc/locale.gen; done \
-    && locale-gen \
-;fi
 
 ###########################################################################
 # MySQL Client:
@@ -303,18 +279,6 @@ ARG INSTALL_PING=false
 
 RUN if [ ${INSTALL_PING} = true ]; then \
     apt-get -y install inetutils-ping \
-;fi
-
-###########################################################################
-# sshpass:
-###########################################################################
-
-USER root
-
-ARG INSTALL_SSHPASS=false
-
-RUN if [ ${INSTALL_SSHPASS} = true ]; then \
-    apt-get -y install sshpass \
 ;fi
 
 ###########################################################################
