@@ -326,7 +326,6 @@ RUN set -eux; \
 USER root
 
 ARG INSTALL_YAML=false
-ARG INSTALL_FFMPEG=false
 
 RUN set -eux; \
   ###########################################################################
@@ -343,13 +342,7 @@ RUN set -eux; \
     fi; \
     echo "extension=yaml.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini; \
     ln -s /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini /etc/php/${LARADOCK_PHP_VERSION}/cli/conf.d/35-yaml.ini; \
-  fi; \
-  ###########################################################################
-  # FFMpeg:
-  ###########################################################################
-  if [ ${INSTALL_FFMPEG} = true ]; then \
-    apt-get -yqq install ffmpeg; \
-  fi
+  fi;
 
 ###########################################################################
 # BBC Audio Waveform Image Generator:
