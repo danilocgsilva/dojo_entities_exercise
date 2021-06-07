@@ -13,8 +13,7 @@
 #
 
 ARG LARADOCK_PHP_VERSION
-ARG BASE_IMAGE_TAG_PREFIX=latest
-FROM laradock/workspace:${BASE_IMAGE_TAG_PREFIX}-${LARADOCK_PHP_VERSION}
+FROM laradock/workspace:latest-${LARADOCK_PHP_VERSION}
 
 LABEL maintainer="Mahmoud Zalt <mahmoud@zalt.me>"
 
@@ -266,39 +265,9 @@ RUN set -eux; \
     fi
 
 ###########################################################################
-
-ARG INSTALL_SMB=false
-ARG INSTALL_IMAP=false
-ARG INSTALL_SUBVERSION=false
-
-RUN set -eux; \
-    ###########################################################################
-    # SMB:
-    ###########################################################################
-    if [ ${INSTALL_SMB} = true ]; then \
-        apt-get install -yqq smbclient php-smbclient coreutils; \
-    fi; \
-    ###########################################################################
-    # IMAP:
-    ###########################################################################
-    if [ ${INSTALL_IMAP} = true ]; then \
-        apt-get install -yqq php${LARADOCK_PHP_VERSION}-imap; \
-    fi; \
-    ###########################################################################
-    # Subversion:
-    ###########################################################################
-    if [ ${INSTALL_SUBVERSION} = true ]; then \
-        apt-get install -yqq subversion; \
-    fi
-
-
-###########################################################################
 USER root
 
 ARG INSTALL_MYSQL_CLIENT=false
-ARG INSTALL_PING=false
-ARG INSTALL_SSHPASS=false
-ARG INSTALL_DOCKER_CLIENT=false
 
 RUN set -eux; \
   ###########################################################################
@@ -306,80 +275,7 @@ RUN set -eux; \
   ###########################################################################
   if [ ${INSTALL_MYSQL_CLIENT} = true ]; then \
     apt-get -yqq install mysql-client; \
-  fi; \
-  ###########################################################################
-  # ping:
-  ###########################################################################
-  if [ ${INSTALL_PING} = true ]; then \
-    apt-get -yqq install inetutils-ping; \
-  fi; \
-  ###########################################################################
-  # sshpass:
-  ###########################################################################
-  if [ ${INSTALL_SSHPASS} = true ]; then \
-    apt-get -yqq install sshpass; \
-  fi; \
-  ###########################################################################
-  # Docker Client:
-  ###########################################################################
-  if [ ${INSTALL_DOCKER_CLIENT} = true ]; then \
-    curl -sS https://download.docker.com/linux/static/stable/x86_64/docker-20.10.3.tgz -o /tmp/docker.tar.gz; \
-    tar -xzf /tmp/docker.tar.gz -C /tmp/; \
-    cp /tmp/docker/docker* /usr/local/bin; \
-    chmod +x /usr/local/bin/docker*; \
-  fi
-
-###########################################################################
-USER root
-
-ARG INSTALL_YAML=false
-ARG INSTALL_FFMPEG=false
-
-RUN set -eux; \
-  ###########################################################################
-  # YAML: extension for PHP-CLI
-  ###########################################################################
-  if [ ${INSTALL_YAML} = true ]; then \
-    apt-get install -yqq libyaml-dev; \
-    if   [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-        echo '' | pecl install -a yaml-1.3.2; \
-    elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
-        echo '' | pecl install yaml-2.0.4; \
-    else \
-        echo '' | pecl install yaml; \
-    fi; \
-    echo "extension=yaml.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini; \
-    ln -s /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini /etc/php/${LARADOCK_PHP_VERSION}/cli/conf.d/35-yaml.ini; \
-  fi; \
-  ###########################################################################
-  # FFMpeg:
-  ###########################################################################
-  if [ ${INSTALL_FFMPEG} = true ]; then \
-    apt-get -yqq install ffmpeg; \
-  fi
-
-###########################################################################
-# BBC Audio Waveform Image Generator:
-###########################################################################
-
-USER root
-
-ARG INSTALL_AUDIOWAVEFORM=false
-
-RUN if [ ${INSTALL_AUDIOWAVEFORM} = true ]; then \
-   apt-get -y install git wget make cmake gcc g++ libmad0-dev libid3tag0-dev libsndfile1-dev libgd-dev libboost-filesystem-dev libboost-program-options-dev libboost-regex-dev \
-   && git clone https://github.com/bbc/audiowaveform.git \
-   && cd audiowaveform \
-   && wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
-   && tar xzf release-1.10.0.tar.gz \
-   && ln -s googletest-release-1.10.0/googletest googletest \
-   && ln -s googletest-release-1.10.0/googlemock googlemock \
-   && mkdir build \
-   && cd build \
-   && cmake .. \
-   && make \
-   && make install \
-;fi
+  fi;
 
 #####################################
 # wkhtmltopdf:
@@ -490,105 +386,6 @@ RUN if [ ${INSTALL_PROTOC} = true ]; then \
 ###########################################################################
 
 RUN set -xe; php -v | head -n 1 | grep -q "PHP ${LARADOCK_PHP_VERSION}."
-
-###########################################################################
-# Oh My ZSH!
-###########################################################################
-
-USER root
-
-ARG SHELL_OH_MY_ZSH=false
-RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
-    apt install -y zsh \
-;fi
-
-ARG SHELL_OH_MY_ZSH_AUTOSUGESTIONS=false
-ARG SHELL_OH_MY_ZSH_ALIASES=false
-
-USER laradock
-RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh) --keep-zshrc" && \
-    sed -i -r 's/^plugins=\(.*?\)$/plugins=(laravel5)/' /home/laradock/.zshrc && \
-    echo '\n\
-bindkey "^[OB" down-line-or-search\n\
-bindkey "^[OC" forward-char\n\
-bindkey "^[OD" backward-char\n\
-bindkey "^[OF" end-of-line\n\
-bindkey "^[OH" beginning-of-line\n\
-bindkey "^[[1~" beginning-of-line\n\
-bindkey "^[[3~" delete-char\n\
-bindkey "^[[4~" end-of-line\n\
-bindkey "^[[5~" up-line-or-history\n\
-bindkey "^[[6~" down-line-or-history\n\
-bindkey "^?" backward-delete-char\n' >> /home/laradock/.zshrc && \
-  if [ ${SHELL_OH_MY_ZSH_AUTOSUGESTIONS} = true ]; then \
-    sh -c "git clone https://github.com/zsh-users/zsh-autosuggestions /home/laradock/.oh-my-zsh/custom/plugins/zsh-autosuggestions" && \
-    sed -i 's~plugins=(~plugins=(zsh-autosuggestions ~g' /home/laradock/.zshrc && \
-    sed -i '1iZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20' /home/laradock/.zshrc && \
-    sed -i '1iZSH_AUTOSUGGEST_STRATEGY=(history completion)' /home/laradock/.zshrc && \
-    sed -i '1iZSH_AUTOSUGGEST_USE_ASYNC=1' /home/laradock/.zshrc && \
-    sed -i '1iTERM=xterm-256color' /home/laradock/.zshrc \
-  ;fi && \
-  if [ ${SHELL_OH_MY_ZSH_ALIASES} = true ]; then \
-    echo "" >> /home/laradock/.zshrc && \
-    echo "# Load Custom Aliases" >> /home/laradock/.zshrc && \
-    echo "source /home/laradock/aliases.sh" >> /home/laradock/.zshrc && \
-    echo "" >> /home/laradock/.zshrc \
-  ;fi \
-;fi
-
-USER root
-
-###########################################################################
-# ZSH User Aliases
-###########################################################################
-
-USER root
-
-COPY ./aliases.sh /root/aliases.sh
-COPY ./aliases.sh /home/laradock/aliases.sh
-
-RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
-    sed -i 's/\r//' /root/aliases.sh && \
-    sed -i 's/\r//' /home/laradock/aliases.sh && \
-    chown laradock:laradock /home/laradock/aliases.sh && \
-    echo "" >> ~/.zshrc && \
-    echo "# Load Custom Aliases" >> ~/.zshrc && \
-    echo "source ~/aliases.sh" >> ~/.zshrc && \
-	  echo "" >> ~/.zshrc \
-;fi
-
-USER laradock
-
-RUN if [ ${SHELL_OH_MY_ZSH} = true ]; then \
-    echo "" >> ~/.zshrc && \
-    echo "# Load Custom Aliases" >> ~/.zshrc && \
-    echo "source ~/aliases.sh" >> ~/.zshrc && \
-	  echo "" >> ~/.zshrc \
-;fi
-
-USER root
-
-
-###########################################################################
-# PHP DECIMAL:
-###########################################################################
-
-USER root
-
-ARG INSTALL_PHPDECIMAL=false
-
-RUN if [ ${INSTALL_PHPDECIMAL} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-      echo 'decimal not support PHP 5.6'; \
-    else \
-      apt-get install -yqq libmpdec-dev \
-      && pecl install decimal \
-      && echo "extension=decimal.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/decimal.ini \
-      && ln -s /etc/php/${LARADOCK_PHP_VERSION}/mods-available/decimal.ini /etc/php/${LARADOCK_PHP_VERSION}/cli/conf.d/30-decimal.ini \
-      && php -m | grep -q 'decimal' \
-    ;fi \
-;fi
 
 #
 #--------------------------------------------------------------------------
