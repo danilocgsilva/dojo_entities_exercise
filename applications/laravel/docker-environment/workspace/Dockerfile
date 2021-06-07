@@ -265,38 +265,9 @@ RUN set -eux; \
     fi
 
 ###########################################################################
-
-ARG INSTALL_SMB=false
-ARG INSTALL_IMAP=false
-ARG INSTALL_SUBVERSION=false
-
-RUN set -eux; \
-    ###########################################################################
-    # SMB:
-    ###########################################################################
-    if [ ${INSTALL_SMB} = true ]; then \
-        apt-get install -yqq smbclient php-smbclient coreutils; \
-    fi; \
-    ###########################################################################
-    # IMAP:
-    ###########################################################################
-    if [ ${INSTALL_IMAP} = true ]; then \
-        apt-get install -yqq php${LARADOCK_PHP_VERSION}-imap; \
-    fi; \
-    ###########################################################################
-    # Subversion:
-    ###########################################################################
-    if [ ${INSTALL_SUBVERSION} = true ]; then \
-        apt-get install -yqq subversion; \
-    fi
-
-
-###########################################################################
 USER root
 
 ARG INSTALL_MYSQL_CLIENT=false
-ARG INSTALL_PING=false
-ARG INSTALL_DOCKER_CLIENT=false
 
 RUN set -eux; \
   ###########################################################################
@@ -304,68 +275,7 @@ RUN set -eux; \
   ###########################################################################
   if [ ${INSTALL_MYSQL_CLIENT} = true ]; then \
     apt-get -yqq install mysql-client; \
-  fi; \
-  ###########################################################################
-  # ping:
-  ###########################################################################
-  if [ ${INSTALL_PING} = true ]; then \
-    apt-get -yqq install inetutils-ping; \
-  fi; \
-  ###########################################################################
-  ###########################################################################
-  # Docker Client:
-  ###########################################################################
-  if [ ${INSTALL_DOCKER_CLIENT} = true ]; then \
-    curl -sS https://download.docker.com/linux/static/stable/x86_64/docker-20.10.3.tgz -o /tmp/docker.tar.gz; \
-    tar -xzf /tmp/docker.tar.gz -C /tmp/; \
-    cp /tmp/docker/docker* /usr/local/bin; \
-    chmod +x /usr/local/bin/docker*; \
-  fi
-
-###########################################################################
-USER root
-
-ARG INSTALL_YAML=false
-
-RUN set -eux; \
-  ###########################################################################
-  # YAML: extension for PHP-CLI
-  ###########################################################################
-  if [ ${INSTALL_YAML} = true ]; then \
-    apt-get install -yqq libyaml-dev; \
-    if   [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-        echo '' | pecl install -a yaml-1.3.2; \
-    elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
-        echo '' | pecl install yaml-2.0.4; \
-    else \
-        echo '' | pecl install yaml; \
-    fi; \
-    echo "extension=yaml.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini; \
-    ln -s /etc/php/${LARADOCK_PHP_VERSION}/mods-available/yaml.ini /etc/php/${LARADOCK_PHP_VERSION}/cli/conf.d/35-yaml.ini; \
   fi;
-
-###########################################################################
-# BBC Audio Waveform Image Generator:
-###########################################################################
-
-USER root
-
-ARG INSTALL_AUDIOWAVEFORM=false
-
-RUN if [ ${INSTALL_AUDIOWAVEFORM} = true ]; then \
-   apt-get -y install git wget make cmake gcc g++ libmad0-dev libid3tag0-dev libsndfile1-dev libgd-dev libboost-filesystem-dev libboost-program-options-dev libboost-regex-dev \
-   && git clone https://github.com/bbc/audiowaveform.git \
-   && cd audiowaveform \
-   && wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
-   && tar xzf release-1.10.0.tar.gz \
-   && ln -s googletest-release-1.10.0/googletest googletest \
-   && ln -s googletest-release-1.10.0/googlemock googlemock \
-   && mkdir build \
-   && cd build \
-   && cmake .. \
-   && make \
-   && make install \
-;fi
 
 #####################################
 # wkhtmltopdf:

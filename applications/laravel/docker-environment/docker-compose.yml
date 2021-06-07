@@ -16,17 +16,15 @@ services:
         context: ./php-fpm
         args:
           - LARADOCK_PHP_VERSION=${PHP_VERSION}
-          - INSTALL_AUDIOWAVEFORM=${PHP_FPM_AUDIOWAVEFORM}
-          - PUID=${PHP_FPM_PUID}
-          - PGID=${PHP_FPM_PGID}
+          - PUID=1000
+          - PGID=1000
           - LOCALE=${PHP_FPM_DEFAULT_LOCALE}
-          - INSTALL_DOCKER_CLIENT=${PHP_FPM_INSTALL_DOCKER_CLIENT}
           - http_proxy
           - https_proxy
           - no_proxy
       volumes:
         - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
-        - ../:/var/www${APP_CODE_CONTAINER_FLAG}
+        - ../:/var/www:cached
       expose:
         - "9000"
       extra_hosts:
@@ -44,12 +42,12 @@ services:
         context: ./nginx
         args:
           - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
-          - PHP_UPSTREAM_PORT=${NGINX_PHP_UPSTREAM_PORT}
+          - PHP_UPSTREAM_PORT=9000
           - http_proxy
           - https_proxy
           - no_proxy
       volumes:
-        - ../:/var/www${APP_CODE_CONTAINER_FLAG}
+        - ../:/var/www:cached
         - ${NGINX_HOST_LOG_PATH}:/var/log/nginx
         - ./nginx/sites/:/etc/nginx/sites-available
         - ${NGINX_SSL_PATH}:/etc/nginx/ssl
