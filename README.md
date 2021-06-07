@@ -13,6 +13,7 @@ A system that will provides full functionality to the following:
 * User registering
 * User login
 * Housing registering
+* Person registering (that will not be the same as a User)
 * Relationships between housings and persons
 * Full CRUD over persons and housings
 * API to allow third parties to allow crud
