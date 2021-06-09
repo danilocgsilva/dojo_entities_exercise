@@ -1,8 +1,8 @@
 # Choose storage path on your machine. For all storage systems
-DATA_PATH_HOST=~/.dockerdata/data
+DATA_PATH_HOST=~/.laradock/data
 
 # Define the prefix of container names. This is useful if you have multiple projects that use laradock to have separate containers per project.
-COMPOSE_PROJECT_NAME=dojo_laravel
+COMPOSE_PROJECT_NAME=laradock
 
 ### PHP Version ###########################################
 PHP_VERSION=7.4
@@ -27,11 +27,11 @@ NGINX_SSL_PATH=./nginx/ssl/
 
 ### MARIADB ###############################################
 
-MARIADB_DATABASE=dojo_laravel
-MARIADB_USER=dojo_user
+MARIADB_DATABASE=default
+MARIADB_USER=default
 MARIADB_PASSWORD=secret
 MARIADB_PORT=3306
-MARIADB_ROOT_PASSWORD=rootsecret
+MARIADB_ROOT_PASSWORD=root
 MARIADB_ENTRYPOINT_INITDB=./mariadb/docker-entrypoint-initdb.d
 
 DB_HOST=mariadb
