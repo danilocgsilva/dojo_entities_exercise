@@ -11,16 +11,23 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const TABLE = 'user';
+
+    public const FILLABLE = [
+        'name' => 'name',
+        'email' => 'email',
+        'password' => 'password',
+    ];
+
+    protected $table = self::TABLE;
+
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = self::FILLABLE;
 
     /**
      * The attributes that should be hidden for arrays.

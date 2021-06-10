@@ -1,2 +1,4 @@
 applications/laravel/composer.lock
 applications/laravel/package-lock.json
+applications/laravel/public/js/app.js
+applications/laravel/public/css/app.css
