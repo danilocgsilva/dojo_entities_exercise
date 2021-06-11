@@ -2,7 +2,7 @@
 
 ## Frontend
 
-Uses Jquery and Bootstrap 3.
+Uses Jquery and Bootstrap 4.
 
 ## Models
 
@@ -13,3 +13,4 @@ Uses Jquery and Bootstrap 3.
 
 * PersonController
 * HousingController
+* AuthenticationController

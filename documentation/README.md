@@ -1,8 +1,8 @@
 # Documentation
 
 * [Documentation types](Documentation_types.md)
-* [01 Requirements](01_Requirements/index.md)
-* [02 Arquitetural](02_Architectural/index.md)
+* [01 Requirements](01_Requirements/README.md)
+* [02 Arquitetural](02_Architectural/README.md)
 
 ## Framework specifics documentation
 

@@ -18,16 +18,18 @@ class FirstUserSeeder extends Seeder
         $userData = [
             'userName' => "Danilo",
             'userMail' => "danilo@test.com",
-            'userPassword' => "secret123"
+            'userPassword' => $this->getPassword()
         ];
 
         if ($this->userExists($userData)) {
-            print("The user " . $userData["userName"] . " already exists");
+            $message = "The user " . $userData["userName"] . " already exists";
         }
         else {
             $this->createUser($userData);
-            print("The user with name " . $userData["name"] . " and the mail " . $userData["userMail"] . " was created.");
+            $message = "The user with name " . $userData["userName"] . " and the mail " . $userData["userMail"] . " was created. Password: " . $userData["userPassword"];
         }
+
+        $this->formattedMessage($message);
     }
 
     private function userExists(array $userData): bool
@@ -37,11 +39,22 @@ class FirstUserSeeder extends Seeder
 
     private function createUser(array $userData): User
     {
-            User::create([
-                User::FILLABLE["name"] => $userData["userName"],
-                User::FILLABLE["email"] => $userData["userMail"],
-                User::FILLABLE["password"] => $userData["password"]
-            ]);
-        }
+        return User::create([
+            User::FILLABLE["name"] => $userData["userName"],
+            User::FILLABLE["email"] => $userData["userMail"],
+            User::FILLABLE["password"] => bcrypt(
+                $userData["userPassword"]
+            )
+        ]);
+    }
+
+    private function formattedMessage(string $message): void
+    {
+        print($message . "\n");
+    }
+
+    private function getPassword(): string
+    {
+        return "secret1234";
     }
 }
