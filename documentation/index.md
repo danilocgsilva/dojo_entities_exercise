@@ -6,7 +6,7 @@
 
 ## Framework specifics documentation
 
-* [Laravel Design](03_Laravel_Specifics/index.md)
+* [Laravel Arquiteture](03_Laravel_Specifics/README.md)
 * Laravel DDD
 * Laravel API
 ---
@@ -17,3 +17,7 @@
 * .NET Design
 * .NET DDD
 * .NET API
+---
+* .Django Design
+* .Django DDD
+* .Django API

@@ -1,4 +1,4 @@
-# Laravel Design Documentation
+# Laravel Architeture Documentation
 
 Uses the most recent Laravel version (6.5.2 at the time of the writing). But as said in the [Architectural Documentation](../02_Architectural/index.md), the bootstrap framework will be set to 3.7.x, which is not the default from the most recent Laravel version.
 
